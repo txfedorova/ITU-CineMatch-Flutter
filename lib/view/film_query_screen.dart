@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:itu_app/model/film_model.dart';
 import 'package:itu_app/controller/film_controller.dart';
+import 'package:itu_app/config/tmdb_config.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:provider/provider.dart';
@@ -20,10 +21,6 @@ import 'dart:io';
 
 // https://stackoverflow.com/questions/38933801/calling-an-async-method-from-a-constructor-in-dart
 class _FilmQueryResults {
-  final String apiKey = 'c1e3556e0182098dbaff3210c89a584e';
-  final String readAccessToken =
-      'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjMWUzNTU2ZTAxODIwOThkYmFmZjMyMTBjODlhNTg0ZSIsInN1YiI6IjY1NjYxYzAwODlkOTdmMDBlMTcyZmUyMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Rk1-fBcVDmw5XDQ6ww7LHKkgidnmBMhPqiM6SZvZWO0';
-
   final int maxResults = 10;
 
   List<Film> films = [];
@@ -31,8 +28,9 @@ class _FilmQueryResults {
   late TMDB tmdb;
 
   _FilmQueryResults._create(String movieTitle) {
+    TmdbConfig.validate();
     tmdb = TMDB(
-      ApiKeys(apiKey, readAccessToken),
+      ApiKeys(TmdbConfig.apiKey, TmdbConfig.readAccessToken),
       logConfig: const ConfigLogger.showAll(),
     );
   }
@@ -60,7 +58,6 @@ class _FilmQueryResults {
         .where((result) => result != null)
         .cast<Map<String, dynamic>>()
         .toList();
-
 
     if (validResults.length > fqr.maxResults) {
       validResults.length = fqr.maxResults;
@@ -223,7 +220,6 @@ class _QueryResult extends StatelessWidget {
   Future<String> downloadPoster() async {
     String url = "$tmdbImageBaseUrl${queriedFilm.posterPath}";
     final imageName = "${queriedFilm.title}.jpg";
-
 
     final appDir = await path_provider.getApplicationDocumentsDirectory();
     final localPath = path.join(appDir.path, imageName);
